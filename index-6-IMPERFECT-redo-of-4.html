@@ -1,0 +1,248 @@
+<h1>Tic Tac Toe</h1>
+<p>To play the game, click on an empty square to place your game piece (X or O). The first player to get three of their
+    game pieces in a row, column, or diagonal wins the game. If all squares are filled and no player has won, the game
+    is a draw.</p>
+<!-- Create a container element for the game board -->
+<div id="game-board">
+    <!-- Create a div element for each square on the game board -->
+    <div class="square" data-row="0" data-col="0"></div>
+    <div class="square" data-row="0" data-col="1"></div>
+    <div class="square" data-row="0" data-col="2"></div>
+    <div class="square" data-row="1" data-col="0"></div>
+    <div class="square" data-row="1" data-col="1"></div>
+    <div class="square" data-row="1" data-col="2"></div>
+    <div class="square" data-row="2" data-col="0"></div>
+    <div class="square" data-row="2" data-col="1"></div>
+    <div class="square" data-row="2" data-col="2"></div>
+</div>
+<!-- Create a container element for the scores and AI checkbox -->
+<div id="controls">
+    <!-- Create an element for displaying the score for X -->
+    <span id="score-x">0</span>
+    <!-- Create an element for displaying the score for O -->
+    <span id="score-o">0</span>
+
+    <!-- Create a checkbox for toggling the AI -->
+    <label>
+        <input type="checkbox" id="ai-checkbox">
+        AI
+    </label>
+
+    <!-- Create a button for resetting the game -->
+    <button id="reset-button">Reset</button>
+</div>
+<!-- Add a style element to define the styles for the game board, squares, scores, and controls -->
+<style>
+    /* Style the game board and squares */
+    #game-board {
+        width: 314px;
+        border: 1px solid black;
+        display: inline-block;
+    }
+
+    .square {
+        width: 100px;
+        height: 100px;
+        border: 1px solid black;
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+        font-size: 36px;
+        white-space: nowrap;
+    }
+
+    /* Style the controls */
+    #controls {
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    #score-x,
+    #score-o {
+        font-size: 24px;
+    }
+
+    label {
+        margin-right: 10px;
+    }
+</style>
+
+
+<script>
+    // Define the dimensions of the game board
+    const BOARD_SIZE = 3;
+
+    // Define the values for each player's game pieces
+    const PLAYER_X = "X";
+    const PLAYER_O = "O";
+
+    // Define the initial state of the game board
+    let gameBoard = [
+        [null, null, null],
+        [null, null, null],
+        [null, null, null]
+    ];
+
+    // Define the current player
+    let currentPlayer = PLAYER_X;
+
+    // Define a variable for keeping track of the state of the AI
+    let aiEnabled = false;
+
+    // Define a function for checking if a player has won the game
+    function hasPlayerWon(player) {
+        // Check for wins along rows
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            if (
+                gameBoard[row][0] === player &&
+                gameBoard[row][1] === player &&
+                gameBoard[row][2] === player
+            ) {
+                // The player has won along this row
+                return true;
+            }
+        }
+
+        // Check for wins along columns
+        for (let col = 0; col < BOARD_SIZE; col++) {
+            if (
+                gameBoard[0][col] === player &&
+                gameBoard[1][col] === player &&
+                gameBoard[2][col] === player
+            ) {
+                // The player has won along this column
+                return true;
+            }
+        }
+
+        // Check for wins along diagonal 1
+        if (
+            gameBoard[0][0] === player &&
+            gameBoard[1][1] === player &&
+            gameBoard[2][2] === player
+        ) {
+            // The player has won along diagonal 1
+            return true;
+        }
+
+        // Check for wins along diagonal 2
+        if (
+            gameBoard[0][2] === player &&
+            gameBoard[1][1] === player &&
+            gameBoard[2][0] === player
+        ) {
+            // The player has won along diagonal 2
+            return true;
+        }
+
+        // The player has not won
+        return false;
+    }
+
+    // Define a function for placing a player's game piece on the game board
+    function placePiece(player, row, col) {
+        // Place the game piece on the game board
+        gameBoard[row][col] = player;
+
+        // Update the HTML of the square to show the game piece
+        let square = document.querySelector(
+            `.square[data-row="${row}"][data-col="${col}"]`
+        );
+        square.innerHTML = player;
+
+        // Check if the game is over
+        if (hasPlayerWon(currentPlayer)) {
+            // The current player has won, so update the scores and remove click event listeners from all squares
+            if (currentPlayer === PLAYER_X) {
+                let scoreX = document.querySelector("#score-x");
+                scoreX.innerHTML = parseInt(scoreX.innerHTML) + 1;
+            } else {
+                let scoreO = document.querySelector("#score-o");
+                scoreO.innerHTML = parseInt(scoreO.innerHTML) + 1;
+            }
+
+            // Remove the click event listeners from all squares
+            let squares = document.querySelectorAll(".square");
+            for (let square of squares) {
+                square.removeEventListener("click", handleSquareClick);
+            }
+        } else {
+            // The game is not over, so switch players
+            currentPlayer = currentPlayer === PLAYER_X ? PLAYER_O : PLAYER_X;
+
+            // If the AI is enabled and it's the AI's turn, make a move
+            if (aiEnabled && currentPlayer === PLAYER_O) {
+                makeAIMove();
+            }
+        }
+    }
+
+
+    // Define a function for resetting the game
+    function resetGame() {
+        // Reset the game board
+        gameBoard = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null]
+        ];
+
+        // Reset the current player
+        currentPlayer = PLAYER_X;
+
+        // Reset the scores
+        document.querySelector("#score-x").innerHTML = 0;
+        document.querySelector("#score-o").innerHTML = 0;
+
+        // Update the HTML of all squares to show empty squares
+        let squares = document.querySelectorAll(".square");
+        for (let square of squares) {
+            square.innerHTML = "";
+        }
+
+        // Add click event listeners to all squares
+        for (let square of squares) {
+            square.addEventListener("click", handleSquareClick);
+        }
+    }
+
+    // Define a function for handling click events on the squares
+    function handleSquareClick(event) {
+        // Get the row and column of the square that was clicked
+        let square = event.currentTarget;
+        let row = parseInt(square.getAttribute("data-row"));
+        let col = parseInt(square.getAttribute("data-col"));
+
+        // Make sure the square is empty and the game is not over
+        if (gameBoard[row][col] !== null || currentPlayer === null) {
+            return;
+        }
+
+        // Place the game piece for the current player on the game board
+        placePiece(currentPlayer, row, col);
+    }
+
+    // Define a function for handling change events on the AI checkbox
+    function handleAICheckboxChange(event) {
+        // Update the state of the AI
+        aiEnabled = event.currentTarget.checked;
+    }
+
+    // Define a function for handling click events on the reset button
+    function handleResetButtonClick(event) {
+        // Reset the game
+        resetGame();
+    }
+
+    // Add click event listeners to all squares
+    let squares = document.querySelectorAll(".square");
+    for (let square of squares) {
+        square.addEventListener("click", handleSquareClick);
+    }
+
+    // Add change event listeners to the AI checkbox
+    document.querySelector("#ai-checkbox").addEventListener("change", handleAICheckboxChange);
+
+    // Add click event listeners to the reset button
+    document.querySelector("#reset-button").addEventListener("click", handleResetButtonClick);
+</script>

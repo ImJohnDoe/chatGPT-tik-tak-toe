@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tic Tac Toe</title>
+</head>
+
+<body>
+    <h1>Tic Tac Toe</h1>
+    <p>To play the game, click on an empty square to place your game piece (X or O). The first player to get three of
+        their
+        game pieces in a row, column, or diagonal wins the game. If all squares are filled and no player has won, the
+        game
+        is a draw.</p>
+    <p>
+        Player X score: <span id="score-x">0</span>
+        Player O score: <span id="score-o">0</span>
+    </p>
+    <p>
+        <label for="ai-checkbox">
+            <input type="checkbox" id="ai-checkbox">
+            Enable AI
+        </label>
+        <button id="reset-button">Reset Game</button>
+    </p>
+    <div id="game-board">
+        <div class="square" data-row="0" data-col="0"></div>
+        <div class="square" data-row="0" data-col="1"></div>
+        <div class="square" data-row="0" data-col="2"></div>
+        <div class="square" data-row="1" data-col="0"></div>
+        <div class="square" data-row="1" data-col="1"></div>
+        <div class="square" data-row="1" data-col="2"></div>
+        <div class="square" data-row="2" data-col="0"></div>
+        <div class="square" data-row="2" data-col="1"></div>
+        <div class="square" data-row="2" data-col="2"></div>
+    </div>
+    <style>
+        /* Style the game board and squares */
+        #game-board {
+            width: 314px;
+            border: 1px solid black;
+            display: inline-block;
+        }
+
+        .square {
+            width: 100px;
+            height: 100px;
+            border: 1px solid black;
+            display: inline-block;
+            vertical-align: top;
+            text-align: center;
+            font-size: 36px;
+            white-space: nowrap;
+        }
+    </style>
+    <script>
+        // Define the dimensions of the game board
+        const BOARD_SIZE = 3;
+
+        // Define the values for each player's game pieces
+        const PLAYER_X = "X";
+        const PLAYER_O = "O";
+
+        // Define the initial state of the game board
+        let gameBoard = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null]
+        ];
+
+        // Define the current player
+        let currentPlayer = PLAYER_X;
+
+        // Define a variable for whether the AI is enabled
+        let aiEnabled = false;
+
+        // Define a function for placing a player's game piece on the game board
+        function placePiece(player, row, col) {
+            // Place the player's game piece on the game board
+            gameBoard[row][col] = player;
+
+            // Update the HTML of the square to show the player's game piece
+            let square = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+            square.innerHTML = player;
+        }
+
+        // Define a function for checking if a player has won the game
+        function hasPlayerWon(player) {
+            // Check for wins along rows
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                if (
+                    gameBoard[row][0] === player &&
+                    gameBoard[row][1] === player &&
+                    gameBoard[row][2] === player
+                ) {
+                    // The player has won along this row
+                    return true;
+                }
+            }
+
+            // Check for wins along columns
+            for (let col = 0; col < BOARD_SIZE; col++) {
+                if (
+                    gameBoard[0][col] === player &&
+                    gameBoard[1][col] === player &&
+                    gameBoard[2][col] === player
+                ) {
+                    // The player has won along this column
+                    return true;
+                }
+            }
+
+            // Check for wins along diagonal 1
+            if (
+                gameBoard[0][0] === player &&
+                gameBoard[1][1] === player &&
+                gameBoard[2][2] === player
+            ) {
+                // The player has won along diagonal 1
+                return true;
+            }
+
+            // Check for wins along diagonal 2
+            if (
+                gameBoard[0][2] === player &&
+                gameBoard[1][1] === player &&
+                gameBoard[2][0] === player
+            ) {
+                // The player has won along diagonal 2
+                return true;
+            }
+
+            // The player has not won
+            return false;
+        }
+
+        // Define a function for checking if the game is a draw
+        function isGameADraw() {
+            // Check if any squares are empty
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    if (gameBoard[row][col] === null) {
+                        // The game is not a draw
+                        return false;
+                    }
+                }
+            }
+
+            // All squares are filled, so the game is a draw
+            return true;
+        }
+
+        // Define a function for handling square clicks
+        function handleSquareClick(event) {
+            // Get the row and column of the clicked square
+            let square = event.target;
+            let row = parseInt(square.getAttribute("data-row"));
+            let col = parseInt(square.getAttribute("data-col"));
+
+            // Check if the game is over or the square is already occupied
+            if (currentPlayer === null || gameBoard[row][col] !== null) {
+                // The game is over or the square is occupied, so do nothing
+                return;
+            }
+
+            // Place the current player's game piece on the game board
+            placePiece(currentPlayer, row, col);
+
+            // Check if the current player has won
+            if (hasPlayerWon(currentPlayer)) {
+                // The game is over
+                currentPlayer = null;
+
+                // Show an alert to indicate that the game is over
+                let playerName = currentPlayer === PLAYER_X ? "Player X" : "Player O";
+                alert(`${playerName} has won the game!`);
+
+                // Update the score for the player who won
+                if (currentPlayer === PLAYER_X) {
+                    let scoreX = document.querySelector("#score-x");
+                    scoreX.innerHTML = parseInt(scoreX.innerHTML) + 1;
+                } else {
+                    let scoreO = document.querySelector("#score-o");
+                    scoreO.innerHTML = parseInt(scoreO.innerHTML) + 1;
+                }
+            } else if (isGameADraw()) {
+                // The game is a draw
+                currentPlayer = null;
+
+                // Show an alert to indicate that the game is a draw
+                alert("The game is a draw!");
+            } else {
+                // Switch to the other player
+                currentPlayer = currentPlayer === PLAYER_X ? PLAYER_O : PLAYER_X;
+
+                // If the AI is enabled and it is the AI's turn, let it take its turn
+                if (aiEnabled && currentPlayer === PLAYER_O) {
+                    takeAITurn();
+                }
+            }
+        }
+
+        // Define a function for resetting the game
+        function resetGame() {
+            // Reset the game board
+            gameBoard = [
+                [null, null, null],
+                [null, null, null],
+                [null, null, null]
+            ];
+
+            // Reset the squares on the game board
+            let squares = document.querySelectorAll(".square");
+            for (let i = 0; i < squares.length; i++) {
+                squares[i].innerHTML = "";
+            }
+
+            // Set the current player to X
+            currentPlayer = PLAYER_X;
+        }
+
+        // Define a function for the AI to take its turn
+        function takeAITurn() {
+            // Check if there is a square that the AI can place its game piece on to win
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    if (gameBoard[row][col] === null) {
+                        // Place the AI's game piece on the game board and check if it has won
+                        gameBoard[row][col] = PLAYER_O;
+                        if (hasPlayerWon(PLAYER_O)) {
+                            // The AI has won by placing its game piece on this square, so take this turn
+                            placePiece(PLAYER_O, row, col);
+                            return;
+                        }
+                        // The AI did not win by placing its game piece on this square, so undo the move
+                        gameBoard[row][col] = null;
+                    }
+                }
+            }
+
+            // Check if there is a square that the player can place their game piece on to win, and block it
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    if (gameBoard[row][col] === null) {
+                        // Place the player's game piece on the game board and check if they have won
+                        gameBoard[row][col] = PLAYER_X;
+                        if (hasPlayerWon(PLAYER_X)) {
+                            // The player would win by placing their game piece on this square, so the AI should take this square to block them
+                            placePiece(PLAYER_O, row, col);
+                            return;
+                        }
+                        // The player would not win by placing their game piece on this square, so undo the move
+                        gameBoard[row][col] = null;
+                    }
+                }
+            }
+
+            // Choose a random empty square and take it
+            let emptySquares = [];
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    if (gameBoard[row][col] === null) {
+                        emptySquares.push({ row: row, col: col });
+                    }
+                }
+            }
+            let square = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+            placePiece(PLAYER_O, square.row, square.col);
+        }
+
+        // Handle clicks on the squares
+        let squares = document.querySelectorAll(".square");
+        for (let i = 0; i < squares.length; i++) {
+            squares[i].addEventListener("click", handleSquareClick);
+        }
+
+        // Handle clicks on the reset button
+        let resetButton = document.querySelector("#reset-button");
+        resetButton.addEventListener("click", resetGame);
+
+        // Handle changes to the AI toggle
+        let aiToggle = document.querySelector("#ai-toggle");
+        aiToggle.addEventListener("change", function (event) {
+            // Update the value of the aiEnabled variable
+            aiEnabled = event.target.checked;
+
+            // If the AI is now enabled and it is the AI's turn, let it take its turn
+            if (aiEnabled && currentPlayer === PLAYER_O) {
+                takeAITurn();
+            }
+        }
+        );
+
+    </script>
