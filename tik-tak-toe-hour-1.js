@@ -170,6 +170,7 @@ gameBoard = [
     [null, null, null]
 ];
 console.assert(hasGameEnded() === false);
+
 // Define a function for placing a player's game piece on the game board
 function placePiece(player, row, col) {
     // Check if the specified space is out-of-bounds
